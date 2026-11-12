@@ -4,6 +4,13 @@
 This repository holds the CLISP prediction corpus and the toy evaluator for
 Problem Set 3. The assignment manual defines the work and the submission rules.
 
+
+**Members:**
+
+Erine Lourdes L. Medalla (@e-rine)
+Marc Raven A. Sian (@gosl1)
+
+
 ## Layout
 
 ```text
