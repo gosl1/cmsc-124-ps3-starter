@@ -1,10 +1,7 @@
 # Environments and the Toy Evaluator
 
-Replace this paragraph after your checks pass. Trace one form through your own
-`eval-expr`, point to the line that captures the defining environment, say what
-would change if application joined the arguments to the caller's environment
-instead, and explain why the host CLISP needs `funcall` where the toy language
-doesn't.
-
-
 The defining environment is captured in the lambda branch of `eval-expr`, specifically through `(make-closure (second expr) (third expr) env)`. The `make-closure` function stores this environment alongside the parameters and body using `(list :closure params body env)`. In the scope-discrimination case, when `(lambda (y) (+ x y))` is evaluated, the environment contains the binding `x = 2`. The binding for f is not present yet because eval-let evaluates the lambda initializer first, before adding the new bindings to the environment. Hence, the closure captures the environment containing `x = 2`, which it retains even when called from a different environment.
+
+If apply-closure used the caller's environment instead, the call (f 1) would run the body using `((y . 1) (x . 100) (f . closure) (x . 2))`. Since lookup always takes the first matching name, it would get x = 100 instead of x = 2, making the result 101 instead of 3. This would mean that the language is dynamically scoped, where variables are resolved based on where the function is called rather than where it was originally defined. Also, the fourth element of the closure, which stores the environment, would basically go to waste, which would defeat the purpose of having make-closure store the environment in the first place.
+
+CLISP needs funcall because it is a Lisp-2, meaning variables and functions have separate namespaces. When we write (f 1), CLISP looks for a function named "f" instead of checking if the variable "f" contains a function. So we use `(funcall f 1)` to call the function stored in that variable. The toy language doesn't need funcall because it is a Lisp-1. In the last branch of eval-expr, the head "f" is evaluated with `(eval-expr (first expr) env)`, which uses the same lookup as every other variable, so evaluating (f 1) is enough to find the closure and call it. Basically, Common Lisp separates the way it looks up variables and functions, while our evaluator uses just one lookup process for both. That's the main difference we understood between the two.
