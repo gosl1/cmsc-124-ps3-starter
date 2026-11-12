@@ -26,8 +26,11 @@
 
 The first match wins, so an inner binding shadows an outer one that shares its
 name. Signal an error when NAME is not bound at all."
-  (declare (ignore name env))
-  (error "lookup is not implemented"))
+  (let ((binding (assoc name env)))
+    (if binding
+        (cdr binding)
+        (error "Unbound variable: ~S" name))))
+
 
 ;;; E2 -- prefix arithmetic.
 
@@ -36,15 +39,22 @@ name. Signal an error when NAME is not bound at all."
 
 MAPCAR and a LAMBDA do this in one line. Watch the arity: EVAL-EXPR takes two
 arguments and MAPCAR hands its function one."
-  (declare (ignore exprs env))
-  (error "eval-operands is not implemented"))
+  (mapcar (lambda (expr)
+            (eval-expr expr env))
+          exprs))
+
 
 (defun apply-op (op values)
   "Apply the arithmetic operator OP to the two numbers in VALUES.
 
 OP is the symbol +, -, or *. Signal an error for anything else."
-  (declare (ignore op values))
-  (error "apply-op is not implemented"))
+  (case op
+    (+ (+ (first values) (second values)))
+    (- (- (first values) (second values)))
+    (* (* (first values) (second values)))
+    (otherwise
+     (error "Unknown arithmetic operator: ~S" op))))
+
 
 ;;; E3 -- let.
 
