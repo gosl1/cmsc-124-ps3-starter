@@ -12,52 +12,49 @@ wrongly. Say what you predicted, what CLISP printed, and which rule you
 misread. Those entries belong in the correction commits.
 
 ## P01
-The multiplication evaluated  2 * 3, which is 6 + 1 = 7 due to the addition outside, which is an integer. Length is none, and the + is a function.
+`(+ 1 (* 2 3))` heads with the function `+`. A function evaluates all its arguments before it runs, so `(* 2 3)` becomes 6 first, and then adds 1 to get 7. That is an integer, so the length is none, and the head is a function.
 
 ## P02
-quote returns (+ 1 2) unevaluated. This is a list so kind is cons. which means it has a valid length 3, and quote is a special-operator.
+`'(+ 1 2)` heads with the special operator `quote`. Quote returns its argument without evaluating it, so the result is the list `(+ 1 2)` and the addition never runs. That is a cons, so the length is 3, and the head is a special operator.
 
 ## P03
-nil is classified as null, since it is empty the length is 0.
-it is atomic so operator is none.
+`nil` is an atom, so it has no head. It evaluates to itself, the empty list, and reads that as null. That is a null, the length is 0, and the head is none.
 
 ## P04
-t is a symbol even if it represents true. Not a sequence of elements so its length is none. It is atomic so operator is none.
+`t` is an atom, so it has no head. It evaluates to itself, which is a symbol that is not nil. That is a symbol, the length is none, and the head is none.
 
 ## P05
-symbolp evaluates nil and returns t since it is a symbol. This means length is none, and operator is a function which is symbolp.
+`(symbolp nil)` heads with the function `symbolp`. A function evaluates its arguments first, so nil stays nil, and symbolp then asks whether it is a symbol, since nil is a symbol, the result is t. That is a symbol, the length is none, and the head is function.
 
 ## P06
-quote passes unevaluated list to car. car returns first element and the list is empty, so result is nil. Kind is null, which is length 0. car is a function here.
+`(car '())` heads with the function `car`. The quote hands car the empty list unevaluated, and an empty list returns nil since there is no first element. That is a null, the length is 0, and the head is a function.
 
 ## P07
-cons adds the element 1 to the existing list before 2 and 3. Hence, kind is cons, its length is now 3, and the operator cons is a function.
+`(cons 1 '(2 3))` heads with the function `cons`. The quote hands the list `(2 3)`, and cons puts 1 in front of it to make `(1 2 3)`. That is a cons, the length is 3, and the head is a function.
 
 ## P08
-null evaluates '() as an empty list and returns t. if then picks the true-clause. So the value is empty, this is a symbol, so length is none. and if is a special operator.
+`(if (null '()) 'empty 'full)` heads with the special operator `if`. The condition (null '()) is true because the list is empty, so if evaluates only the first branch and returns its value which is empty. That is a symbol, the length is none, and the head is a special operator.
 
 ## P09
-and evaluates until it encounters a false value. nil is false so value is nil, kind is null, which makes length 0, and the operator and is a special-operator
+`(and 1 nil 3)` heads with the special operator `and`, which CLISP reports ahead of macro. It evaluates left to right and stops at the first nil, so 3 is never evaluated and the result is nil. That is a null, the length is 0, and the head is a special operator.
 
 ## P10
-Dynamic scoping lets let's declaration of *ps3-rate* to 10 which is passed once we call the function locally, this is because defvar turns it into a special variable, which means any let block will create a temporary dynamic binding instead of a local lexical binding. the value is then 30, with kind integer, length none, and operator being a special operator.
+`(progn ...)` heads with the special operator `progn`. It evaluates the forms in order and returns the value of the last one, so defvar and defun are basically just setups, ps3-rate is also a special variable, so the let rebinding to 10 is visible inside ps3-scale when it runs, and the last line gives 3 * 10 is 30. That is an integer, so the length is none, and the head is a special operator.
 
 ## P11
-No calling has occured yet. Evaluating defun returns its function name which is ps3-twice. That is a symbol. So length is none, and defun is a macro.
+`(defun ps3-twice (n) (* n 2))` heads with the macro `defun`. The macro defines the function ps3-twice and returns the name, so the body never runs. That is a symbol, so the length is none and the head is a macro.
 
 ## P12
-labels defines a recursive function called down and it stops when n reaches 0, returning an empty list. we can see in each iteration, cons n adds onto the list, until it eventually produces (3 2 1). So value is (3,2,1) the kind is then cons, length is 3, and the operator is a special operator.
+`(labels ...)` heads with the special operator `labels`. It makes a small function down that can call itself, and down puts n at the front of the list and calls itself with one less until n is 0, where it stops with the empty list, so it gives `(3 2 1)`. That is a cons, so the length is 3 and the head is a special operator.
 
 ## P13
-mapcar applies a function to every element of a list and returns the results. We evaluate 3 inner lists with length
-which returns (2 0 1). Value is (2,0,1), kind is cons, length is 3, and operator here is a function.
+`(mapcar #'length '((1 2) () (3)))` heads with the function `mapcar`. It gets the length of each inner list and the empty list has length 0, so the result is `(2 0 1)`. That is a cons, so the length is 3 and the head is a function.
 
 ## P14
-mapcar applies the anonymous function lambda to each element in the list, so each element is multiplied by itself. returning (1 4 9). Value is (1,4,9), kind is cons, length is 3, and operator is a function.
+`(mapcar (lambda (n) (* n n)) '(1 2 3))` heads with the function `mapcar`. It runs the lambda on each number in which it  squares each value, so the result would be `(1 4 9)`. That is a cons, so the length is 3 and the head is a function.
 
 ## P15
-We are not calling anything, but lambda creates the raw object itself so its value is #<function>. Kind is function, length being none, and operator is a macro.
+`(lambda (n) (* n 2))` heads with the macro `lambda`. It only builds a function and does not call it, so the body never runs and the result is a function object. That is a function, so the length is none and the head is a macro.
 
 ## P16
-factor is not a special variable, so lexical scoping is done.
-So we bind 2 for factor, as the inner let binding of 10 does not change what the function uses. The value is then 6, with kind integer, length none, and operator as special-operator.
+`(let ((factor 2)) ...)` heads with the special operator `let`. The function f remembers the factor that was 2 when it was made, so the later factor of 10 doesn't affect it and `(funcall f 3)` is 6. That is an integer, so the length is none and the head is a special operator.
